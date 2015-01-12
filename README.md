@@ -13,7 +13,11 @@ Author: Lin Dong
 - [x] Double-tap one picture into gallery layout (line layout, fit to screen)
 
 - [x] Pull down to fetch data from the Internet, refresh control
+
 - [x] Drag and reordering
 
-
 iPad orientation won't matter
+
+## Demo
+
+[Demo](https://github.com/ldong/myPinterest/blob/master/demo.mp4)
