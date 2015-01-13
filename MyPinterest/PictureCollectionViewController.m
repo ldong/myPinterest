@@ -272,26 +272,30 @@ static NSString * const reuseIdentifier = @"Cell";
         self.gestureEndIndex = [self.collectionView indexPathForItemAtPoint:loc];
         //update date source
         PictureModel *picModel = [self.pictureModels objectAtIndex:self.gestureBeginIndex.row];
-        [self.pictureModels removeObjectAtIndex:self.gestureBeginIndex.row];
-        [self.pictureModels insertObject:picModel atIndex:self.gestureEndIndex.row];
-        [UIView animateWithDuration:.4f animations:^{
-          self.draggingView.transform = CGAffineTransformIdentity;
-        } completion:^(BOOL finished) {
-          //change items
-          __weak typeof(self) weakSelf = self;
-          [self.collectionView performBatchUpdates:^{
-            __strong typeof(self) strongSelf = weakSelf;
-            if (strongSelf) {
-              [strongSelf.collectionView deleteItemsAtIndexPaths:@[ self.gestureBeginIndex ]];
-              [strongSelf.collectionView insertItemsAtIndexPaths:@[ self.gestureEndIndex ]];
-            }
+        if(picModel){
+          [self.pictureModels removeObjectAtIndex:self.gestureBeginIndex.row];
+           NSLog(@"==== insert picModel");
+          [self.pictureModels insertObject:picModel atIndex:self.gestureEndIndex.row];
+          [UIView animateWithDuration:.4f animations:^{
+            self.draggingView.transform = CGAffineTransformIdentity;
           } completion:^(BOOL finished) {
-            [self.collectionView reloadData];
+            //change items
+            __weak typeof(self) weakSelf = self;
+            [self.collectionView performBatchUpdates:^{
+              __strong typeof(self) strongSelf = weakSelf;
+              if (strongSelf && self.gestureBeginIndex && self.gestureEndIndex) {
+                [strongSelf.collectionView deleteItemsAtIndexPaths:@[ self.gestureBeginIndex ]];
+                NSLog(@"==== insert strongSelf");
+                [strongSelf.collectionView insertItemsAtIndexPaths:@[ self.gestureEndIndex ]];
+              }
+            } completion:^(BOOL finished) {
+              [self.collectionView reloadData];
+            }];
+            [self.draggingView removeFromSuperview];
+            self.draggingView = nil;
+            self.gestureBeginIndex = nil;
           }];
-          [self.draggingView removeFromSuperview];
-          self.draggingView = nil;
-          self.gestureBeginIndex = nil;
-        }];
+        }
       } else {
         [UIView animateWithDuration:.4f animations:^{
           self.draggingView.transform = CGAffineTransformIdentity;
