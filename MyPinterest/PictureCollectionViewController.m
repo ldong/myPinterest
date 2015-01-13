@@ -206,6 +206,7 @@ static NSString * const reuseIdentifier = @"Cell";
   PictureCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
   
   cell.imageView.image = [((PictureModel*)[[self pictureModels] objectAtIndex:indexPath.row]) scaledImage];
+  [cell.contentView setAlpha:1.f];
   return cell;
 }
 
@@ -242,17 +243,13 @@ static NSString * const reuseIdentifier = @"Cell";
   if ([self.collectionView.collectionViewLayout isKindOfClass:[PictureWaterfallCollectionViewLayout class]]) {
     NSLog(@"class Name: %@", [self.collectionViewLayout class]);
     CGPoint loc = [sender locationInView:self.collectionView];
-    
     CGFloat heightInScreen = fmodf((loc.y-self.collectionView.contentOffset.y), CGRectGetHeight(self.collectionView.frame));
     CGPoint locInScreen = CGPointMake( loc.x-self.collectionView.contentOffset.x, heightInScreen );
-    
     if (sender.state == UIGestureRecognizerStateBegan) {
       self.gestureBeginIndex = [self.collectionView indexPathForItemAtPoint:loc];
-      
       if (self.gestureBeginIndex) {
         PictureCollectionViewCell *cell = (PictureCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:self.gestureBeginIndex];
         self.draggingView = [[UIImageView alloc] initWithImage:[cell getRasterizedImageCopy]];
-        
         [cell.contentView setAlpha:0.f];
         [self.view addSubview:self.draggingView];
         self.draggingView.center = locInScreen;
@@ -273,63 +270,45 @@ static NSString * const reuseIdentifier = @"Cell";
     if (sender.state == UIGestureRecognizerStateEnded) {
       if (self.draggingView) {
         self.gestureEndIndex = [self.collectionView indexPathForItemAtPoint:loc];
-        if (self.gestureEndIndex) {
-          //update date source
-          NSNumber *thisNumber = [self.pictureModels objectAtIndex:self.gestureBeginIndex.row];
-          [self.pictureModels removeObjectAtIndex:self.gestureBeginIndex.row];
-          
-          if (self.gestureEndIndex.row < self.gestureBeginIndex.row) {
-            [self.pictureModels insertObject:thisNumber atIndex:self.gestureEndIndex.row];
-          } else {
-            [self.pictureModels insertObject:thisNumber atIndex:self.gestureEndIndex.row];
-          }
-          
-          [UIView animateWithDuration:.4f animations:^{
-            self.draggingView.transform = CGAffineTransformIdentity;
+        //update date source
+        NSNumber *thisNumber = [self.pictureModels objectAtIndex:self.gestureBeginIndex.row];
+        [self.pictureModels removeObjectAtIndex:self.gestureBeginIndex.row];
+        [self.pictureModels insertObject:thisNumber atIndex:self.gestureEndIndex.row];
+        [UIView animateWithDuration:.4f animations:^{
+          self.draggingView.transform = CGAffineTransformIdentity;
+        } completion:^(BOOL finished) {
+          //change items
+          __weak typeof(self) weakSelf = self;
+          [self.collectionView performBatchUpdates:^{
+            __strong typeof(self) strongSelf = weakSelf;
+            if (strongSelf) {
+              [strongSelf.collectionView deleteItemsAtIndexPaths:@[ self.gestureBeginIndex ]];
+              [strongSelf.collectionView insertItemsAtIndexPaths:@[ self.gestureEndIndex ]];
+            }
           } completion:^(BOOL finished) {
-            
-            
-            
-            //change items
-            __weak typeof(self) weakSelf = self;
-            [self.collectionView performBatchUpdates:^{
-              __strong typeof(self) strongSelf = weakSelf;
-              if (strongSelf) {
-                
-                [strongSelf.collectionView deleteItemsAtIndexPaths:@[ self.gestureBeginIndex ]];
-                [strongSelf.collectionView insertItemsAtIndexPaths:@[ strongSelf.gestureEndIndex ]];
-              }
-            } completion:^(BOOL finished) {
-              PictureCollectionViewCell *movedCell = (PictureCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:self.gestureEndIndex];
-              [movedCell.contentView setAlpha:1.f];
-              
-              PictureCollectionViewCell *oldIndexCell = (PictureCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:self.gestureBeginIndex];
-              [oldIndexCell.contentView setAlpha:1.f];
-            }];
-            
-            [self.draggingView removeFromSuperview];
-            self.draggingView = nil;
-            self.gestureBeginIndex = nil;
-            
+            PictureCollectionViewCell *movedCell = (PictureCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:self.gestureEndIndex];
+            [movedCell.contentView setAlpha:1.f];
+            PictureCollectionViewCell *oldIndexCell = (PictureCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:self.gestureBeginIndex];
+            [oldIndexCell.contentView setAlpha:1.f];
+            [self.collectionView reloadData];
           }];
-          
-        } else {
-          [UIView animateWithDuration:.4f animations:^{
-            self.draggingView.transform = CGAffineTransformIdentity;
-          } completion:^(BOOL finished) {
-            PictureCollectionViewCell *cell = (PictureCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:self.gestureBeginIndex];
-            [cell.contentView setAlpha:1.f];
-            
-            [self.draggingView removeFromSuperview];
-            self.draggingView = nil;
-            self.gestureBeginIndex = nil;
-          }];
-        }
-        
-        loc = CGPointZero;
+          [self.draggingView removeFromSuperview];
+          self.draggingView = nil;
+          self.gestureBeginIndex = nil;
+        }];
+      } else {
+        [UIView animateWithDuration:.4f animations:^{
+          self.draggingView.transform = CGAffineTransformIdentity;
+        } completion:^(BOOL finished) {
+          PictureCollectionViewCell *cell = (PictureCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:self.gestureBeginIndex];
+          [cell.contentView setAlpha:1.f];
+          [self.draggingView removeFromSuperview];
+          self.draggingView = nil;
+          self.gestureBeginIndex = nil;
+        }];
       }
+      loc = CGPointZero;
     }
   }
 }
-
 @end
