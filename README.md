@@ -14,6 +14,8 @@ Author: Lin Dong
 
 - [x] Pull down to fetch data from the Internet, refresh control
 
+    * NSCache for images that already downloaded from the Internet.
+
 - [x] Drag and reordering
 
 iPad orientation won't matter

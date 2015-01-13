@@ -22,6 +22,8 @@
 @property (strong, nonatomic) NSIndexPath *gestureEndIndex;
 @property (nonatomic) UIImageView *draggingView;
 @property (nonatomic) CGPoint dragViewStartLocation;
+// cache
+@property (strong, nonatomic) NSCache * internetImageCache;
 @end
 
 
@@ -110,11 +112,22 @@ static NSString * const reuseIdentifier = @"Cell";
   [sender endRefreshing];
 }
 
+-(NSCache *)internetImageCache{
+  if (!_internetImageCache) {
+    _internetImageCache = [[NSCache alloc]init];
+  }
+  return _internetImageCache;
+}
+
+
 -(void) fetchPictureFromInternetURL: (NSURL*) url{
   dispatch_queue_t downloadQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, NULL);
   dispatch_async(downloadQueue, ^{
-    NSData * imageData = [NSData dataWithContentsOfURL:url];
-    
+    NSData * imageData = [[self internetImageCache]objectForKey:url];
+    if(!imageData){
+      imageData = [NSData dataWithContentsOfURL:url];
+      [[self internetImageCache] setObject:imageData forKey:url];
+    }
     dispatch_async(dispatch_get_main_queue(),^{
       UIImage *image = [UIImage imageWithData:imageData];
       PictureModel *model = [[PictureModel alloc]init:image];
