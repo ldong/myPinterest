@@ -271,9 +271,9 @@ static NSString * const reuseIdentifier = @"Cell";
       if (self.draggingView) {
         self.gestureEndIndex = [self.collectionView indexPathForItemAtPoint:loc];
         //update date source
-        NSNumber *thisNumber = [self.pictureModels objectAtIndex:self.gestureBeginIndex.row];
+        PictureModel *picModel = [self.pictureModels objectAtIndex:self.gestureBeginIndex.row];
         [self.pictureModels removeObjectAtIndex:self.gestureBeginIndex.row];
-        [self.pictureModels insertObject:thisNumber atIndex:self.gestureEndIndex.row];
+        [self.pictureModels insertObject:picModel atIndex:self.gestureEndIndex.row];
         [UIView animateWithDuration:.4f animations:^{
           self.draggingView.transform = CGAffineTransformIdentity;
         } completion:^(BOOL finished) {
@@ -286,10 +286,6 @@ static NSString * const reuseIdentifier = @"Cell";
               [strongSelf.collectionView insertItemsAtIndexPaths:@[ self.gestureEndIndex ]];
             }
           } completion:^(BOOL finished) {
-            PictureCollectionViewCell *movedCell = (PictureCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:self.gestureEndIndex];
-            [movedCell.contentView setAlpha:1.f];
-            PictureCollectionViewCell *oldIndexCell = (PictureCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:self.gestureBeginIndex];
-            [oldIndexCell.contentView setAlpha:1.f];
             [self.collectionView reloadData];
           }];
           [self.draggingView removeFromSuperview];
