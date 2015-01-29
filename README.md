@@ -22,4 +22,6 @@ iPad orientation won't matter
 
 ## Demo
 
+![](https://github.com/ldong/myPinterest/blob/iPhone/iPhoneDemo.gif)
+
 [Demo](https://github.com/ldong/myPinterest/blob/master/demo.mp4)
