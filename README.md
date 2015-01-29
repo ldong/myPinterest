@@ -18,7 +18,7 @@ Author: Lin Dong
 
 - [x] Drag and reordering
 
-iPad orientation won't matter
+Orientations won't matter
 
 ## Demo
 
