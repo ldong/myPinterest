@@ -66,7 +66,10 @@
   UICollectionViewLayoutAttributes* attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:indexPath];
   PictureModel* picModel = (PictureModel*)[[self pictureModels] objectAtIndex:indexPath.row];
   
-  attributes.size = picModel.scaledImage.size;
+//  attributes.size = picModel.scaledImage.size;
+  double width = [UIScreen mainScreen].bounds.size.width/3.f*2.f;
+  attributes.size = CGSizeMake(width,width);
+  
   attributes.center = CGPointMake([[UIScreen mainScreen] bounds].size.width/2, [[UIScreen mainScreen] bounds].size.height/2);
   attributes.zIndex = indexPath.row;
   CGAffineTransform transform = CGAffineTransformMakeRotation(4 -(arc4random()%4));
